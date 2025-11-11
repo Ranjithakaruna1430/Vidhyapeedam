@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ॐ Namashivaya Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1:#fff7ed; /* soft saffron */
+      --bg2:#fff3d9;
+      --card:#ffffffcc;
+      --accent:#c97a2b; /* deep saffron */
+      --muted:#6b5b4a;
+      --ok:#2f7a4b;
+      font-family: 'Rubik', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;background:linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:var(--muted);padding:18px;
+      -webkit-font-smoothing:antialiased;
+    }
+    header{display:flex;align-items:center;gap:12px}
+    .logo{width:64px;height:64px;border-radius:12px;background:radial-gradient(circle at 30% 30%, #fff7e6, #ffd89a);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+    .logo .om{font-size:28px;color:var(--accent);font-weight:700}
+    h1{margin:0;font-size:18px;color:var(--accent)}
+    p.lead{margin:2px 0 18px;font-size:13px;color:#7a5f43}
+
+    .container{display:grid;grid-template-columns:1fr;gap:12px;max-width:980px;margin:14px auto}
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.06)}
+
+    form .row{display:flex;gap:10px;align-items:center}
+    label{font-size:13px;color:#6b5b4a}
+    input[type=text], input[type=date], input[type=number], select{width:100%;padding:10px;border-radius:8px;border:1px solid #eee;font-size:15px}
+    button{padding:10px 14px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-weight:600}
+    .mutebtn{background:transparent;color:var(--accent);border:1px solid #f0d9b8}
+
+    .stats{display:flex;gap:12px;flex-wrap:wrap}
+    .stat{flex:1;min-width:140px;background:linear-gradient(180deg,#fff,#fff7f0);padding:12px;border-radius:10px;text-align:center}
+    .stat h3{margin:0;font-size:20px;color:var(--accent)}
+    .small{font-size:12px;color:#7a5f43;margin-top:6px}
+
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{padding:8px;border-bottom:1px solid #f2e6d8;text-align:left;font-size:14px}
+    th{font-weight:600;color:var(--muted)}
+
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    .actions{display:flex;gap:8px}
+
+    @media(min-width:900px){
+      .container{grid-template-columns:360px 1fr}
+    }
+    .chart-wrap{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:900px){.chart-wrap{grid-template-columns:1fr 1fr}}
+
+    footer{font-size:12px;color:#8a6f56;text-align:center;margin-top:12px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo"><div class="om">ॐ</div></div>
+    <div>
+      <h1>ॐ Namashivaya Tracker</h1>
+      <p class="lead">Track daily and cumulative chanting — supports English & Tamil names.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- left column: entry + stats -->
+    <section class="card">
+      <form id="entryForm" autocomplete="off">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+          <div style="flex:1">
+            <label for="name">User name (English / Tamil)</label>
+            <input id="name" type="text" placeholder="Type name (e.g. Ranjitha / ரஞ்சிதா)" required />
+          </div>
+          <div style="width:130px">
+            <label for="date">Date</label>
+            <input id="date" type="date" />
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+          <div style="flex:1">
+            <label for="count">Count for the Day</label>
+            <input id="count" type="number" inputmode="numeric" min="0" step="1" placeholder="e.g. 108" required />
+          </div>
+          <div style="width:120px;display:flex;flex-direction:column">
+            <label>&nbsp;</label>
+            <button id="saveBtn" type="submit">Save</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="stats" style="margin-top:6px">
+        <div class="stat">
+          <div class="small">Total for selected user</div>
+          <h3 id="userTotal">0</h3>
+        </div>
+        <div class="stat">
+          <div class="small">Overall total (all users)</div>
+          <h3 id="overallTotal">0</h3>
+        </div>
+        <div class="stat" title="Entries stored locally on this device">
+          <div class="small">Saved entries</div>
+          <h3 id="savedCount">0</h3>
+        </div>
+      </div>
+
+      <hr style="margin:12px 0;border:none;border-top:1px solid #f0e3cf">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <label for="filterUser">View user</label>
+          <select id="filterUser"></select>
+        </div>
+        <div class="actions">
+          <button id="clearAll" class="mutebtn" title="Delete all saved entries">Clear All</button>
+          <button id="exportCsv" class="mutebtn">Export CSV</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;overflow:auto;max-height:320px">
+        <table id="entriesTable">
+          <thead>
+            <tr><th>User</th><th>Date</th><th>Count</th><th></th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- right column: charts and summary -->
+    <section>
+      <div class="card chart-wrap">
+        <div>
+          <h3 style="margin:0 0 8px 0;color:var(--accent)">Dashboard</h3>
+          <canvas id="barChart" height="180"></canvas>
+        </div>
+        <div>
+          <h3 style="margin:0 0 8px 0;color:var(--accent)">User trend (selected)</h3>
+          <canvas id="lineChart" height="180"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h3 style="margin:0 0 8px 0;color:var(--accent)">Quick actions & Help</h3>
+        <p style="margin:0 0 8px 0;font-size:13px">Tip: Dates default to today. You can add multiple entries for the same user on different dates. Totals update automatically. Data is stored locally — use Export to backup.</p>
+        <div class="controls" style="margin-top:8px">
+          <button id="importBtn" class="mutebtn">Import JSON</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none" />
+          <button id="resetUserTotals" class="mutebtn">Reset a user's totals</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>Made with devotion — open this page on your phone and add a shortcut to homescreen for quick access.</footer>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    // Storage key and helpers
+    const STORAGE_KEY = 'om-namashivaya-entries-v1';
+
+    function loadEntries(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      }catch(e){
+        console.error(e);return [];
+      }
+    }
+    function saveEntries(list){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+
+    // DOM
+    const entryForm = document.getElementById('entryForm');
+    const nameIn = document.getElementById('name');
+    const dateIn = document.getElementById('date');
+    const countIn = document.getElementById('count');
+    const userTotalEl = document.getElementById('userTotal');
+    const overallTotalEl = document.getElementById('overallTotal');
+    const savedCountEl = document.getElementById('savedCount');
+    const filterUser = document.getElementById('filterUser');
+    const entriesTableBody = document.querySelector('#entriesTable tbody');
+
+    // default today's date
+    const today = new Date().toISOString().slice(0,10);
+    dateIn.value = today;
+
+    let entries = loadEntries();
+
+    // Charts
+    let barChart = null, lineChart = null;
+    function ensureCharts(){
+      const barCtx = document.getElementById('barChart');
+      const lineCtx = document.getElementById('lineChart');
+      if(!barChart){
+        barChart = new Chart(barCtx, {type:'bar',data:{labels:[],datasets:[{label:'Total per user',data:[]}],},options:{plugins:{legend:{display:false}}}});
+      }
+      if(!lineChart){
+        lineChart = new Chart(lineCtx, {type:'line',data:{labels:[],datasets:[{label:'Count',data:[],tension:0.3,fill:true}]},options:{plugins:{legend:{display:false}},scales:{x:{ticks:{maxRotation:0}}}});
+      }
+    }
+
+    function render(){
+      entries = loadEntries();
+      // table
+      entriesTableBody.innerHTML='';
+      entries.slice().sort((a,b)=> new Date(b.date)-new Date(a.date)).forEach(e=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(e.name)}</td><td>${e.date}</td><td>${e.count}</td><td style=\"text-align:right\"><button data-id=\"${e.id}\" class=\"del\">Delete</button></td>`;
+        entriesTableBody.appendChild(tr);
+      });
+
+      // saved count
+      savedCountEl.textContent = entries.length;
+
+      // fill filter user
+      const users = Array.from(new Set(entries.map(e=>e.name)));
+      filterUser.innerHTML = '<option value="__all">-- Select user (or All) --</option>' + users.map(u=>`<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
+
+      // overall total
+      const overall = entries.reduce((s,e)=>s+Number(e.count),0);
+      overallTotalEl.textContent = overall;
+
+      // if a user selected, update user total
+      updateSelectedUserTotals();
+
+      // update charts
+      updateCharts();
+
+      // add delete handlers
+      document.querySelectorAll('button.del').forEach(btn=>btn.addEventListener('click',onDelete));
+    }
+
+    function updateSelectedUserTotals(){
+      const sel = filterUser.value || '__all';
+      if(sel==='__all'){
+        userTotalEl.textContent = '—';
+      }else{
+        const total = entries.filter(e=>e.name===sel).reduce((s,e)=>s+Number(e.count),0);
+        userTotalEl.textContent = total;
+      }
+    }
+
+    function updateCharts(){
+      ensureCharts();
+      // bar chart: total per user
+      const totalsByUser = {};
+      entries.forEach(e=>{ totalsByUser[e.name] = (totalsByUser[e.name]||0) + Number(e.count); });
+      const labels = Object.keys(totalsByUser);
+      const data = labels.map(l=>totalsByUser[l]);
+      barChart.data.labels = labels;
+      barChart.data.datasets[0].data = data;
+      barChart.update();
+
+      // line chart: selected user's daily counts
+      const sel = filterUser.value || '__all';
+      if(sel==='__all' || !sel){
+        lineChart.data.labels = [];
+        lineChart.data.datasets[0].data = [];
+        lineChart.update();
+        return;
+      }
+      const byDate = {};
+      entries.filter(e=>e.name===sel).forEach(e=>{ byDate[e.date] = (byDate[e.date]||0)+Number(e.count); });
+      const dates = Object.keys(byDate).sort((a,b)=>new Date(a)-new Date(b));
+      lineChart.data.labels = dates;
+      lineChart.data.datasets[0].data = dates.map(d=>byDate[d]);
+      lineChart.update();
+    }
+
+    // helpers
+    function uuid(){return 'id-'+Math.random().toString(36).slice(2,9);}    
+    function escapeHtml(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');}
+
+    // form submit
+    entryForm.addEventListener('submit',e=>{
+      e.preventDefault();
+      const name = nameIn.value.trim();
+      const date = dateIn.value || today;
+      const count = Number(countIn.value);
+      if(!name){ alert('Please enter a name. You can use Tamil or English.'); return; }
+      if(!Number.isFinite(count) || count<0){ alert('Please enter a valid count (0 or positive number).'); return; }
+
+      // append entry
+      const newEntry = { id: uuid(), name, date, count };
+      entries.push(newEntry);
+      saveEntries(entries);
+
+      // clear count for easier repeat entries
+      countIn.value='';
+      // re-render
+      render();
+      // flash success
+      flashSaved();
+    });
+
+    function onDelete(ev){
+      const id = ev.currentTarget.dataset.id;
+      if(!confirm('Delete this entry?')) return;
+      entries = entries.filter(e=>e.id!==id);
+      saveEntries(entries);
+      render();
+    }
+
+    // filter change
+    filterUser.addEventListener('change',()=>{ updateSelectedUserTotals(); updateCharts(); });
+
+    // clear all
+    document.getElementById('clearAll').addEventListener('click',()=>{
+      if(!confirm('This will remove ALL saved entries from this device. Are you sure?')) return;
+      entries = [];
+      saveEntries(entries);
+      render();
+    });
+
+    // export CSV
+    document.getElementById('exportCsv').addEventListener('click',()=>{
+      if(!entries.length){ alert('No entries to export'); return; }
+      const rows = [['name','date','count']].concat(entries.map(e=>[e.name,e.date,e.count]));
+      const csv = rows.map(r=>r.map(cell=>`"${String(cell).replaceAll('"','""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download = 'om-entries.csv'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    // import JSON
+    document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
+    document.getElementById('importFile').addEventListener('change',ev=>{
+      const f = ev.target.files[0]; if(!f) return; const reader = new FileReader();
+      reader.onload = ()=>{
+        try{
+          const parsed = JSON.parse(reader.result);
+          if(!Array.isArray(parsed)) throw new Error('Invalid format: expected an array');
+          // validate minimal fields
+          const ok = parsed.every(p=>p.name && p.date && (typeof p.count!=='undefined'));
+          if(!ok) throw new Error('Each entry should have name, date, and count');
+          // assign ids if missing
+          const merged = parsed.map(p=>({ id: p.id||uuid(), name:p.name, date:p.date, count:Number(p.count) }));
+          entries = entries.concat(merged);
+          saveEntries(entries);
+          render();
+          alert('Imported ' + merged.length + ' entries.');
+        }catch(err){ alert('Import failed: '+err.message); }
+      };
+      reader.readAsText(f);
+      ev.target.value='';
+    });
+
+    // reset single user's totals (will remove entries of selected user)
+    document.getElementById('resetUserTotals').addEventListener('click',()=>{
+      const sel = filterUser.value || '__all';
+      if(sel==='__all'){ alert('Please select a user from "View user" first.'); return; }
+      if(!confirm('This will remove all saved entries for \"'+sel+'\" on this device. Continue?')) return;
+      entries = entries.filter(e=>e.name!==sel);
+      saveEntries(entries);
+      render();
+    });
+
+    // small flash animation
+    function flashSaved(){
+      const old = document.activeElement; // keep focus
+      const el = document.getElementById('saveBtn');
+      el.textContent = 'Saved ✓';
+      setTimeout(()=>el.textContent='Save',900);
+      if(old) old.focus();
+    }
+
+    // initial render
+    render();
+
+    // expose some helpers for debugging (optional)
+    window.__om_entries = entries;
+  </script>
+</body>
+</html>
