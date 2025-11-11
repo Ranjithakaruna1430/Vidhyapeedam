@@ -1,146 +1,165 @@
 <!DOCTYPE html>
 <html lang="ta">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ஆத்ம ஞான சாஸ்த்ர வித்யா பீடம்</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #ede7f6, #f3e5f5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      background: white;
-      padding: 30px 40px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      text-align: center;
-      width: 340px;
-    }
-    img.logo {
-      height: 120px;
-      width: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 10px;
-    }
-    h1 {
-      margin: 10px 0 25px;
-      font-size: 1.3em;
-      color: #5e35b1;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1em;
-    }
-    button {
-      background: #7e57c2;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button:hover {
-      background: #5e35b1;
-    }
-    .counts {
-      margin-top: 20px;
-      text-align: left;
-    }
-    .counts p {
-      margin: 6px 0;
-      font-weight: 500;
-      color: #4a148c;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <img class="logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy" alt="Vidhyapeedam Logo">
-    <h1>ஆத்ம ஞான சாஸ்த்ர வித்யா பீடம்</h1>
-    <input type="text" id="name" placeholder="Name" />
-    <input type="date" id="date" />
-    <input type="number" id="count" placeholder="Enter the count" />
-    <button onclick="saveData()">Save</button>
-    <div class="counts">
-      <p>User Total Count: <span id="userTotal">0</span></p>
-      <p>Group Total Count: <span id="groupTotal">0</span></p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ஆத்ம ஞான சாஸ்த்ர வித்யா பீடம்</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #ede7f6, #f3e5f5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background: white;
+        padding: 28px;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        width: 340px;
+        text-align: center;
+      }
+      .logo {
+        font-size: 46px;
+      }
+      h1 {
+        font-size: 20px;
+        color: #5e35b1;
+        margin-top: 8px;
+        margin-bottom: 20px;
+      }
+      input,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin: 6px 0;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        font-size: 15px;
+        box-sizing: border-box;
+      }
+      button {
+        background-color: #7e57c2;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #6a44b1;
+      }
+      .counts {
+        text-align: left;
+        margin-top: 16px;
+        color: #4a148c;
+        font-size: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo">🪔</div>
+      <h1>ஆத்ம ஞான சாஸ்த்ர வித்யா பீடம்</h1>
+
+      <input id="name" type="text" placeholder="Enter your name" />
+      <input id="date" type="date" />
+      <input id="count" type="number" placeholder="Enter count" />
+
+      <button onclick="saveData()">Save</button>
+
+      <div class="counts">
+        <div><strong>User Total Count:</strong> <span id="userTotal">—</span></div>
+        <div><strong>Group Total Count:</strong> <span id="groupTotal">—</span></div>
+      </div>
+
+      <p id="status" style="color: #6b4e8a; margin-top: 10px"></p>
     </div>
-  </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    <script>
+      // Your Firebase config
+      const firebaseConfig = {
+        apiKey: "AIzaSyAo9fjlWFSnUgBZQIubh5bGoIyoFBDg1h8",
+        authDomain: "vidyapeedam.firebaseapp.com",
+        databaseURL: "https://vidyapeedam-default-rtdb.firebaseio.com",
+        projectId: "vidyapeedam",
+        storageBucket: "vidyapeedam.firebasestorage.app",
+        messagingSenderId: "883726093815",
+        appId: "1:883726093815:web:44b8bd52b14942ee5ef2f2",
+        measurementId: "G-8ZWRBXCM52"
+      };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAo9fjlWFSnUgBZQIubh5bGoIyoFBDg1h8",
-      authDomain: "vidyapeedam.firebaseapp.com",
-      databaseURL: "https://vidyapeedam-default-rtdb.firebaseio.com",
-      projectId: "vidyapeedam",
-      storageBucket: "vidyapeedam.firebasestorage.app",
-      messagingSenderId: "883726093815",
-      appId: "1:883726093815:web:44b8bd52b14942ee5ef2f2",
-      measurementId: "G-8ZWRBXCM52"
-    };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+      // Realtime group total
+      firebase
+        .database()
+        .ref("users")
+        .on("value", (snapshot) => {
+          let total = 0;
+          snapshot.forEach((childSnap) => {
+            const val = childSnap.val();
+            total += Number(val.totalCount || 0);
+          });
+          document.getElementById("groupTotal").innerText = total;
+        });
 
-    async function saveData() {
-      const name = document.getElementById("name").value.trim();
-      const date = document.getElementById("date").value;
-      const count = parseInt(document.getElementById("count").value) || 0;
+      async function saveData() {
+        const name = document.getElementById("name").value.trim();
+        const date = document.getElementById("date").value;
+        const count = parseInt(document.getElementById("count").value);
+        const status = document.getElementById("status");
 
-      if (!name || !date || !count) {
-        alert("Please fill all fields.");
-        return;
+        if (!name || isNaN(count) || count < 0) {
+          alert("Please enter valid name and count");
+          return;
+        }
+
+        const key = name.replace(/[.#$/\[\]]/g, "_").toLowerCase();
+        const userRef = db.ref("users/" + key);
+
+        try {
+          const snapshot = await userRef.get();
+          let prevTotal = 0;
+          if (snapshot.exists()) {
+            prevTotal = snapshot.val().totalCount || 0;
+          }
+          const newTotal = prevTotal + count;
+
+          await userRef.set({
+            name,
+            lastDate: date,
+            lastCount: count,
+            totalCount: newTotal,
+          });
+
+          document.getElementById("userTotal").innerText = newTotal;
+          document.getElementById("count").value = "";
+          status.innerText = "Saved successfully ✓";
+        } catch (error) {
+          console.error("Error saving:", error);
+          status.innerText = "Error saving data!";
+        }
       }
 
-      const safeName = name.replace(/\./g, "_");
-      const userRef = ref(db, "users/" + safeName);
-      const snapshot = await get(userRef);
-      let totalCount = 0;
-
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        totalCount = data.totalCount || 0;
-      }
-
-      totalCount += count;
-
-      await set(userRef, {
-        name: name,
-        lastDate: date,
-        lastCount: count,
-        totalCount: totalCount
+      // Load user total on name change
+      document.getElementById("name").addEventListener("blur", async () => {
+        const name = document.getElementById("name").value.trim();
+        if (!name) return;
+        const key = name.replace(/[.#$/\[\]]/g, "_").toLowerCase();
+        const snap = await db.ref("users/" + key).get();
+        if (snap.exists()) {
+          document.getElementById("userTotal").innerText =
+            snap.val().totalCount || 0;
+        } else {
+          document.getElementById("userTotal").innerText = 0;
+        }
       });
-
-      document.getElementById("userTotal").innerText = totalCount;
-      alert("தகவல் வெற்றிகரமாக சேமிக்கப்பட்டது!");
-    }
-
-    const usersRef = ref(db, "users");
-    onValue(usersRef, (snapshot) => {
-      let groupTotal = 0;
-      snapshot.forEach((child) => {
-        const data = child.val();
-        groupTotal += data.totalCount || 0;
-      });
-      document.getElementById("groupTotal").innerText = groupTotal;
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
